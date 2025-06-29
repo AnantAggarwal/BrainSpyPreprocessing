@@ -13,7 +13,7 @@ def preprocessAndReplace(base_dir, command, name):
     for file in tqdm(glob.iglob(os.path.join(base_dir, "ADNI/**/**/**/**/*"))):
         output_dir = os.path.relpath(file, BASE_DIR)
         output_dir = os.path.join(name, output_dir)
-        os.system(f"{command} {file} {file}")
+        os.system(f"{command} {file} {output_dir}")
 
 print("Running ROBEX Brain Extraction.......")
 preprocessAndReplace(BASE_DIR, ROBEX_CALL, "skull_stripped")
