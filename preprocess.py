@@ -36,20 +36,21 @@ if args.mni_reg:
     if not checkFSL():
         print("FSL is not installed")
         print("Installing FSL...")
-        check_call(['sh', os.path.join(CURRENT_DIR,'BrainSpyPreprocessing', 'getfsl.sh')], stderr=STDOUT)
+        check_call(['sh', os.path.join(CURRENT_DIR,'BrainSpyPreprocessing', 'getfsl.sh'), CURRENT_DIR], stderr=STDOUT)
+        check_call(['export', 'PATH=/root/fsl/bin:$PATH'], stderr=STDOUT)
         print("Successfully installed FSL.....")
     else:
         print("FSL is already installed")
     
     def mniCommand(file, output_path):
-        return ["flirt", "-in", file, "-ref", "MNI152_T1_1mm_brain.nii.gz", "-out", output_path, 
+        return ["/root/fsl/bin/flirt", "-in", file, "-ref", "MNI152_T1_1mm_brain.nii.gz", "-out", output_path, 
         "-bins", "256", "-cost", "corratio","-dof", "12"]
     commands.append(mniCommand)
     names.append("mni_registered")
 
 if args.segmentation:
     def segmentationCommand(file, output_path):
-        return ["fast", "-t", "1", "-n", "3", "-H", "0.1", "-I", "8", "-l", "20.0", "-o", output_path,"-B","-b", file]
+        return ["/root/fsl/bin/fast", "-t", "1", "-n", "3", "-H", "0.1", "-I", "8", "-l", "20.0", "-o", output_path,"-B","-b", file]
     commands.append(segmentationCommand)
     names.append("segmented")
 
