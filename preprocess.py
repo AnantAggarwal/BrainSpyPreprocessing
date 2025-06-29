@@ -44,7 +44,7 @@ if args.mni_reg:
         print("FSL is already installed")
     
     def mniCommand(file, output_path):
-        return ["/root/fsl/bin/flirt", "-in", file, "-ref", "MNI152_T1_1mm_brain.nii.gz", "-out", output_path, 
+        return ["/root/fsl/bin/flirt", "-in", file, "-ref", "/root/fsl/data/linearMNI/MNI152lin_T1_1mm_brain.nii.gz", "-out", output_path, 
         "-bins", "256", "-cost", "corratio","-dof", "12"]
     commands.append(mniCommand)
     names.append("mni_registered")
