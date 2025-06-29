@@ -11,6 +11,7 @@ parser.add_argument("--base_dir", type=str, required=True, help="The base direct
 parser.add_argument("--robex", action="store_true", help="Whether to run ROBEX Brain Extraction")
 parser.add_argument("--mni_reg", action="store_true", help="Whether to run MNI Registration")
 parser.add_argument("--segmentation", action="store_true", help="Whether to to segment the brain in Gray Matter, White Matter and CSF")
+parser.add_argument("--fsl_install", action="store_true", help="whether to install fsl")
 args = parser.parse_args()
 
 def checkFSL():
@@ -33,7 +34,7 @@ if args.robex:
     names.append("skull_stripped")
 
 if args.mni_reg:
-    if not checkFSL():
+    if args.fsl_install:
         print("FSL is not installed")
         print("Installing FSL...")
         check_call(['sh', os.path.join(CURRENT_DIR,'BrainSpyPreprocessing', 'getfsl.sh')], stderr=STDOUT)
