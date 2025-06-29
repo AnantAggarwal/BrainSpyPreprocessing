@@ -11,7 +11,8 @@ ROBEX_DIR_PATH = os.path.join("BrainSpyPreprocessing", "ROBEX")
 ROBEX_CALL = os.path.join(CURRENT_DIR, ROBEX_DIR_PATH, "runROBEX.sh")
 
 def preprocessAndReplace(base_dir, command, name):
-    for file in tqdm(glob.iglob(os.path.join(base_dir, "ADNI/**/**/**/**/*"))):
+    iters = len(glob.iglob(os.path.join(base_dir, "ADNI/**/**/**/**/*")))
+    for file in tqdm(glob.iglob(os.path.join(base_dir, "ADNI/**/**/**/**/*")), total=iters):
         output_path = os.path.relpath(file, BASE_DIR)
         output_path = os.path.join(CURRENT_DIR, name, output_path)
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
