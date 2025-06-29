@@ -64,7 +64,7 @@ def preprocessAndReplace(base_dir, commands, names):
         output_path = os.path.join(CURRENT_DIR, name, output_path)
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         for command in commands:
-            check_call(command(file, output_path), stdout=DEVNULL, stderr=STDOUT)
+            check_call(command(file, output_path), stderr=STDOUT)
             file = output_path
 
 
