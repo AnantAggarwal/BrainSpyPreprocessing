@@ -13,7 +13,8 @@ ROBEX_CALL = os.path.join(CURRENT_DIR, ROBEX_DIR_PATH, "ROBEX")
 def preprocessAndReplace(base_dir, command, name):
     for file in tqdm(glob.iglob(os.path.join(base_dir, "ADNI/**/**/**/**/*"))):
         output_path = os.path.relpath(file, BASE_DIR)
-        output_path = os.path.join(name, output_path)
+        output_path = os.path.join(CURRENT_DIR, name, output_path)
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
         check_call([command, file, output_path], stderr=STDOUT)
         print(f"Created {output_path} from {file}")
 
