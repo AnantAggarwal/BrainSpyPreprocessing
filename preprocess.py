@@ -15,8 +15,7 @@ def preprocessAndReplace(base_dir, command, name):
         output_path = os.path.relpath(file, BASE_DIR)
         output_path = os.path.join(CURRENT_DIR, name, output_path)
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        check_call([command, file, output_path], stderr=STDOUT)
-        print(f"Created {output_path} from {file}")
+        check_call([command, file, output_path], stdout=DEVNULL, stderr=STDOUT)
 
 print("Running ROBEX Brain Extraction.......")
 preprocessAndReplace(BASE_DIR, ROBEX_CALL, "skull_stripped")
