@@ -189,3 +189,110 @@ ${DOWNLOAD_COMMAND} ${INSTALLER_URL} | \
   --miniconda ${FSLDIR}                  \
   --dest ${FSLDIR}                       \
   "$@"
+
+echo ""
+echo "FSL installation completed successfully!"
+echo ""
+
+# Create FSL environment setup script
+FSL_SETUP_SCRIPT="${FSLDIR}/etc/fslconf/fsl.sh"
+
+# Ensure the directory exists
+mkdir -p "$(dirname "${FSL_SETUP_SCRIPT}")"
+
+# Create the FSL setup script
+cat > "${FSL_SETUP_SCRIPT}" << 'EOF'
+#!/bin/bash
+# FSL Environment Setup Script
+# This script sets up the environment for FSL commands
+
+# Set FSLDIR if not already set
+if [ -z "${FSLDIR}" ]; then
+    export FSLDIR="$(dirname "$(dirname "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")")")"
+fi
+
+# Add FSL bin directory to PATH
+if [[ ":$PATH:" != *":${FSLDIR}/bin:"* ]]; then
+    export PATH="${FSLDIR}/bin:$PATH"
+fi
+
+# Add FSL lib directory to LD_LIBRARY_PATH (Linux) or DYLD_LIBRARY_PATH (macOS)
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    if [[ ":$LD_LIBRARY_PATH:" != *":${FSLDIR}/lib:"* ]]; then
+        export LD_LIBRARY_PATH="${FSLDIR}/lib:$LD_LIBRARY_PATH"
+    fi
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    if [[ ":$DYLD_LIBRARY_PATH:" != *":${FSLDIR}/lib:"* ]]; then
+        export DYLD_LIBRARY_PATH="${FSLDIR}/lib:$DYLD_LIBRARY_PATH"
+    fi
+fi
+
+# Set FSL output type
+export FSLOUTPUTTYPE=NIFTI_GZ
+
+# Set FSL configuration directory
+export FSLMULTIFILEQUIT=TRUE
+export FSLCONFDIR="${FSLDIR}/etc/fslconf"
+
+# Set FSL data directory
+export FSLOUTPUTTYPE=NIFTI_GZ
+
+# Set FSL environment variables for better performance
+export FSLTCLSH="${FSLDIR}/bin/fsltclsh"
+export FSLWISH="${FSLDIR}/bin/fslwish"
+
+# Set FSL environment for conda installation
+export CONDA_PREFIX="${FSLDIR}"
+export MAMBA_ROOT_PREFIX="${FSLDIR}"
+
+# Initialize conda environment
+if [ -f "${FSLDIR}/etc/profile.d/conda.sh" ]; then
+    . "${FSLDIR}/etc/profile.d/conda.sh"
+    conda activate "${FSLDIR}"
+fi
+
+echo "FSL environment configured. FSLDIR=${FSLDIR}"
+echo "You can now use FSL commands like flirt, fast, bet, etc."
+EOF
+
+# Make the setup script executable
+chmod +x "${FSL_SETUP_SCRIPT}"
+
+# Create a user-friendly setup script in the FSL root directory
+USER_SETUP_SCRIPT="${FSLDIR}/setup_fsl.sh"
+cat > "${USER_SETUP_SCRIPT}" << EOF
+#!/bin/bash
+# Quick FSL Environment Setup
+# Source this script to set up FSL environment in your current shell
+
+source "${FSL_SETUP_SCRIPT}"
+
+echo ""
+echo "FSL environment is now active!"
+echo "Try running: flirt -help"
+echo "Or: fast -help"
+echo ""
+EOF
+
+chmod +x "${USER_SETUP_SCRIPT}"
+
+echo "=========================================="
+echo "FSL Installation Complete!"
+echo "=========================================="
+echo ""
+echo "To use FSL commands (flirt, fast, bet, etc.), you need to set up the environment:"
+echo ""
+echo "Option 1 - For current shell session:"
+echo "  source ${USER_SETUP_SCRIPT}"
+echo ""
+echo "Option 2 - For permanent setup, add to your ~/.bashrc or ~/.zshrc:"
+echo "  echo 'source ${USER_SETUP_SCRIPT}' >> ~/.bashrc"
+echo ""
+echo "Option 3 - Run FSL commands directly with full path:"
+echo "  ${FSLDIR}/bin/flirt -help"
+echo "  ${FSLDIR}/bin/fast -help"
+echo ""
+echo "After setting up the environment, you can test with:"
+echo "  flirt -help"
+echo "  fast -help"
+echo ""

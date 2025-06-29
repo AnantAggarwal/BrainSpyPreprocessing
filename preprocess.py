@@ -36,7 +36,7 @@ if args.mni_reg:
     if not checkFSL():
         print("FSL is not installed")
         print("Installing FSL...")
-        check_call(['sh', os.path.join(CURRENT_DIR,'BrainSpyPreprocessing', 'getfsl.sh'), CURRENT_DIR], stderr=STDOUT)
+        check_call(['sh', os.path.join(CURRENT_DIR,'BrainSpyPreprocessing', 'getfsl.sh')], stderr=STDOUT)
         check_call(['export', 'PATH=/root/fsl/bin:$PATH'], stderr=STDOUT)
         print("Successfully installed FSL.....")
     else:
