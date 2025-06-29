@@ -143,7 +143,7 @@ def process_single_file(file_info):
         for i, command in enumerate(commands):
             try:
                 cmd = command(current_file, output_path)
-                check_call(cmd, stderr=STDOUT, timeout=timeout)  # Use configurable timeout
+                check_call(cmd, stderr=DEVNULL, stdout=DEVNULL, timeout=timeout)  # Suppress all output
                 current_file = output_path
             except Exception as e:
                 print(f"Error processing {file} with command {names[i]}: {e}")
@@ -170,8 +170,14 @@ def preprocessAndReplace(base_dir, commands, names):
     file_infos = [(file, commands, names, base_dir, CURRENT_DIR, args.timeout) for file in files]
     
     # Determine number of jobs
-    n_jobs = args.n_jobs if args.n_jobs else min(mp.cpu_count(), len(files))
-    print(f"Using {n_jobs} parallel processes")
+    if args.n_jobs:
+        n_jobs = args.n_jobs
+    else:
+        # Use 75% of CPU cores to avoid memory/I/O bottlenecks
+        n_jobs = max(1, int(mp.cpu_count() * 0.75))
+        n_jobs = min(n_jobs, len(files))  # Don't exceed number of files
+    
+    print(f"Using {n_jobs} parallel processes (out of {mp.cpu_count()} available cores)")
     print(f"Timeout per step: {args.timeout} seconds ({args.timeout//60} minutes)")
     
     # Process files with multiprocessing
