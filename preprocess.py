@@ -156,7 +156,7 @@ def process_single_file(file_info):
 def preprocessAndReplace(base_dir, commands, names):
     """Process all files with multiprocessing"""
     # Get all files to process
-    file_pattern = os.path.join(base_dir, "ADNI/**/**/**/**/*.nii.gz")
+    file_pattern = os.path.join(base_dir, "ADNI/**/**/**/**/*.nii")
     files = list(glob.glob(file_pattern))
     
     if not files:
