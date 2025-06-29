@@ -131,17 +131,27 @@ def process_single_file(file_info):
     file, commands, names, base_dir, current_dir, timeout = file_info
     
     try:
-        # Create output path
-        output_path = os.path.relpath(file, base_dir)
-        name = '_'.join(names)
-        output_path = os.path.join(current_dir, name, output_path)
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        # Get base output path
+        base_output_path = os.path.relpath(file, base_dir)
+        base_output_path = os.path.join(current_dir, base_output_path)
         
         current_file = file
         
         # Apply each command in sequence
         for i, command in enumerate(commands):
             try:
+                # Create unique output path for this step
+                step_name = names[i]
+                output_dir = os.path.join(current_dir, step_name, os.path.dirname(os.path.relpath(file, base_dir)))
+                os.makedirs(output_dir, exist_ok=True)
+                
+                # Create output filename with step suffix
+                base_name = os.path.splitext(os.path.basename(file))[0]
+                if base_name.endswith('.nii'):
+                    base_name = base_name[:-4]  # Remove .nii extension
+                output_filename = f"{base_name}_{step_name}.nii.gz"
+                output_path = os.path.join(output_dir, output_filename)
+                
                 cmd = command(current_file, output_path)
                 check_call(cmd, stderr=DEVNULL, stdout=DEVNULL, timeout=timeout)  # Suppress all output
                 current_file = output_path
