@@ -42,7 +42,7 @@ if args.mni_reg:
         print("Successfully installed FSL.....")
     else:
         print("FSL is already installed")
-    check_call([". ${FSLDIR}/etc/fslconf/fsl.sh"], stderr=STDOUT)
+    check_call(['source',' ${FSLDIR}/etc/fslconf/fsl.sh'], stderr=STDOUT)
     def mniCommand(file, output_path):
         return ["/root/fsl/bin/flirt", "-in", file, "-ref", "/root/fsl/data/linearMNI/MNI152lin_T1_1mm_brain.nii.gz", "-out", output_path, 
         "-bins", "256", "-cost", "corratio","-dof", "12"]
