@@ -67,5 +67,5 @@ def preprocessAndReplace(base_dir, commands, names):
 
 
 print("Running Preprocessing.....")
-preprocessAndReplace(BASE_DIR, ROBEX_CALL, "skull_stripped")
+preprocessAndReplace(BASE_DIR, commands, names)
 print("Preprocessing Completed.....")
