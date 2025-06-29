@@ -13,6 +13,13 @@ parser.add_argument("--mni_reg", action="store_true", help="Whether to run MNI R
 parser.add_argument("--segmentation", action="store_true", help="Whether to to segment the brain in Gray Matter, White Matter and CSF")
 args = parser.parse_args()
 
+def checkFSL():
+    try:
+        check_call(["fsl", "version"], stdout=DEVNULL, stderr=STDOUT)
+        return True
+    except:
+        return False
+
 BASE_DIR = args.base_dir
 CURRENT_DIR = os.getcwd()
 commands, names = [], []
@@ -57,12 +64,7 @@ def preprocessAndReplace(base_dir, commands, names):
         for command in commands:
             check_call(command(file, output_path), stdout=DEVNULL, stderr=STDOUT)
 
-def checkFSL():
-    try:
-        check_call(["fsl", "version"], stdout=DEVNULL, stderr=STDOUT)
-        return True
-    except:
-        return False
+
 
 print("Running Preprocessing.....")
 preprocessAndReplace(BASE_DIR, ROBEX_CALL, "skull_stripped")
