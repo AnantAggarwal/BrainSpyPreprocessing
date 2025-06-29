@@ -42,7 +42,7 @@ if args.mni_reg:
 
 if args.segmentation:
     def segmentationCommand(file, output_path):
-        return ["fast", "-t", "1", "-n", "3", "-H", "0.1", "-I", "8", "-l", "20.0", "-o", output_path,"-B","-b" file]
+        return ["fast", "-t", "1", "-n", "3", "-H", "0.1", "-I", "8", "-l", "20.0", "-o", output_path,"-B","-b", file]
     commands.append(segmentationCommand)
     names.append("segmented")
 
