@@ -23,7 +23,7 @@ def checkFSL():
     try:
         # Try multiple possible FSL paths
         fsl_paths = [
-            "/opt/fsl/bin/fsl",
+            "/root/fsl/bin/fsl",
             "/usr/local/fsl/bin/fsl", 
             "/usr/share/fsl/bin/fsl",
             "fsl"
@@ -85,7 +85,7 @@ if args.mni_reg:
             print("Please install FSL manually or use a Kaggle notebook with FSL pre-installed")
     
     # Get FSL directory
-    fsl_dir = os.environ.get('FSLDIR', '/opt/fsl')
+    fsl_dir = os.environ.get('FSLDIR', '/root/fsl')
     
     def mniCommand(file, output_path):
         """MNI152 registration command"""
@@ -108,7 +108,7 @@ if args.mni_reg:
     names.append("mni_registered")
 
 if args.segmentation:
-    fsl_dir = os.environ.get('FSLDIR', '/opt/fsl')
+    fsl_dir = os.environ.get('FSLDIR', '/root/fsl')
     
     def segmentationCommand(file, output_path):
         """FAST segmentation command"""
