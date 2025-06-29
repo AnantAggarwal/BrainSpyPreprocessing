@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 BASE_DIR = sys.argv[1]
 
-ROBEX_DIR_PATH = ""
+ROBEX_DIR_PATH = "ROBEX"
 ROBEX_CALL = os.join(ROBEX_DIR_PATH, "runROBEX.sh")
 
 def preprocessAndReplace(base_dir, command):
@@ -14,3 +14,4 @@ def preprocessAndReplace(base_dir, command):
 
 print("Running ROBEX Brain Extraction.......")
 preprocessAndReplace(BASE_DIR, ROBEX_CALL)
+print("Successfully ran ROBEX Brain Extraction.......")
