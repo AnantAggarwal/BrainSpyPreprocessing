@@ -15,6 +15,7 @@ parser.add_argument("--mni_reg", action="store_true", help="Whether to run MNI R
 parser.add_argument("--segmentation", action="store_true", help="Whether to to segment the brain in Gray Matter, White Matter and CSF")
 parser.add_argument("--fsl_install", action="store_true", help="whether to install fsl")
 parser.add_argument("--n_jobs", type=int, default=None, help="Number of parallel jobs (default: number of CPU cores)")
+parser.add_argument("--timeout", type=int, default=1800, help="Timeout in seconds for each processing step (default: 1800 seconds = 30 minutes)")
 args = parser.parse_args()
 
 def checkFSL():
@@ -127,7 +128,7 @@ if args.segmentation:
 
 def process_single_file(file_info):
     """Process a single file with all specified commands"""
-    file, commands, names, base_dir, current_dir = file_info
+    file, commands, names, base_dir, current_dir, timeout = file_info
     
     try:
         # Create output path
@@ -142,7 +143,7 @@ def process_single_file(file_info):
         for i, command in enumerate(commands):
             try:
                 cmd = command(current_file, output_path)
-                check_call(cmd, stderr=STDOUT, timeout=300)  # 5 minute timeout
+                check_call(cmd, stderr=STDOUT, timeout=timeout)  # Use configurable timeout
                 current_file = output_path
             except Exception as e:
                 print(f"Error processing {file} with command {names[i]}: {e}")
@@ -166,11 +167,12 @@ def preprocessAndReplace(base_dir, commands, names):
     print(f"Found {len(files)} files to process")
     
     # Prepare file info for multiprocessing
-    file_infos = [(file, commands, names, base_dir, CURRENT_DIR) for file in files]
+    file_infos = [(file, commands, names, base_dir, CURRENT_DIR, args.timeout) for file in files]
     
     # Determine number of jobs
     n_jobs = args.n_jobs if args.n_jobs else min(mp.cpu_count(), len(files))
     print(f"Using {n_jobs} parallel processes")
+    print(f"Timeout per step: {args.timeout} seconds ({args.timeout//60} minutes)")
     
     # Process files with multiprocessing
     successful = 0
