@@ -30,7 +30,7 @@ def setup_fsl():
     
     # Common FSL paths in Kaggle
     fsl_paths = [
-        "/opt/fsl",
+        "/root/fsl",
         "/usr/local/fsl",
         "/usr/share/fsl"
     ]
