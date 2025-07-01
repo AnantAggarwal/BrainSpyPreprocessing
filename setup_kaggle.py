@@ -24,6 +24,18 @@ def install_dependencies():
         except subprocess.CalledProcessError:
             print(f"✗ Failed to install {package}")
 
+    # Check for SimpleITK
+    try:
+        import SimpleITK
+        print("✓ SimpleITK already installed")
+    except ImportError:
+        print("SimpleITK not found. Installing SimpleITK...")
+        try:
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'SimpleITK'])
+            print("✓ SimpleITK installed")
+        except subprocess.CalledProcessError:
+            print("✗ Failed to install SimpleITK")
+
 def setup_fsl():
     """Setup FSL environment for Kaggle"""
     print("Setting up FSL environment...")

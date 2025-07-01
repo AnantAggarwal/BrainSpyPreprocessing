@@ -8,6 +8,15 @@ import argparse
 import multiprocessing as mp
 from pathlib import Path
 
+# Add SimpleITK import
+try:
+    import SimpleITK as sitk
+except ImportError:
+    print("SimpleITK not found. Please install it with 'pip install SimpleITK'.")
+    sys.exit(1)
+
+import urllib.request
+
 parser = argparse.ArgumentParser(description="This is an end to end preprocessing script for the project BrainSpy written by Anant Aggarwal")
 parser.add_argument("--base_dir", type=str, required=True, help="The base directory of the dataset. Basically the parent directory of the ADNI folder")
 parser.add_argument("--robex", action="store_true", help="Whether to run ROBEX Brain Extraction")
@@ -75,35 +84,26 @@ if args.robex:
     names.append("skull_stripped")
 
 if args.mni_reg:
-    if args.fsl_install:
-        print("Installing FSL...")
-        try:
-            check_call(['sh', os.path.join(CURRENT_DIR, 'getfsl.sh')], stderr=STDOUT)
-            print("FSL installation completed")
-        except Exception as e:
-            print(f"FSL installation failed: {e}")
-            print("Please install FSL manually or use a Kaggle notebook with FSL pre-installed")
-    
-    # Get FSL directory
-    fsl_dir = os.environ.get('FSLDIR', '/root/fsl')
-    
+    # Use registration_templates directory for MNI template
+    mni_template_path = os.path.join(CURRENT_DIR, "registration_templates", "MNI152_T1_1mm_brain.nii.gz")
+    download_mni_template(mni_template_path)
+
     def mniCommand(file, output_path):
-        """MNI152 registration command"""
-        ref_template = os.path.join(fsl_dir, "data/standard/MNI152_T1_1mm_brain.nii.gz")
-        # Fallback to alternative template path
-        if not os.path.exists(ref_template):
-            ref_template = os.path.join(fsl_dir, "data/linearMNI/MNI152lin_T1_1mm_brain.nii.gz")
-        
-        return [
-            os.path.join(fsl_dir, "bin/flirt"), 
-            "-in", file, 
-            "-ref", ref_template, 
-            "-out", output_path,
-            "-bins", "256", 
-            "-cost", "corratio",
-            "-dof", "12",
-            "-omat", output_path.replace(".nii.gz", ".mat")
-        ]
+        """SimpleITK-based MNI152 registration command (Python function call)"""
+        fixed = sitk.ReadImage(mni_template_path, sitk.sitkFloat32)
+        moving = sitk.ReadImage(file, sitk.sitkFloat32)
+        initial_transform = sitk.CenteredTransformInitializer(
+            fixed, moving, sitk.Euler3DTransform(), sitk.CenteredTransformInitializerFilter.GEOMETRY
+        )
+        registration_method = sitk.ImageRegistrationMethod()
+        registration_method.SetMetricAsMattesMutualInformation(numberOfHistogramBins=50)
+        registration_method.SetOptimizerAsGradientDescent(learningRate=1.0, numberOfIterations=100, convergenceMinimumValue=1e-6, convergenceWindowSize=10)
+        registration_method.SetInterpolator(sitk.sitkLinear)
+        registration_method.SetInitialTransform(initial_transform, inPlace=False)
+        final_transform = registration_method.Execute(fixed, moving)
+        resampled = sitk.Resample(moving, fixed, final_transform, sitk.sitkLinear, 0.0, moving.GetPixelID())
+        sitk.WriteImage(resampled, output_path)
+        return ["python_function"]  # Dummy return for compatibility
     commands.append(mniCommand)
     names.append("mni_registered")
 
@@ -125,6 +125,17 @@ if args.segmentation:
         ]
     commands.append(segmentationCommand)
     names.append("segmented")
+
+def download_mni_template(template_path):
+    """Download the MNI152 template if not present."""
+    if not os.path.exists(template_path):
+        print(f"Downloading MNI152 template to {template_path}...")
+        url = "https://github.com/NeuroDesk/neurodesk-mni152-templates/raw/main/MNI152_T1_1mm_brain.nii.gz"
+        os.makedirs(os.path.dirname(template_path), exist_ok=True)
+        urllib.request.urlretrieve(url, template_path)
+        print("Download complete.")
+    else:
+        print(f"MNI152 template already exists at {template_path}.")
 
 def process_single_file(file_info):
     """Process a single file with all specified commands"""
@@ -152,8 +163,12 @@ def process_single_file(file_info):
                 output_filename = f"{base_name}_{step_name}.nii.gz"
                 output_path = os.path.join(output_dir, output_filename)
                 
-                cmd = command(current_file, output_path)
-                check_call(cmd, stderr=DEVNULL, stdout=DEVNULL, timeout=timeout)  # Suppress all output
+                # If this is the SimpleITK registration, call as a function
+                if step_name == "mni_registered":
+                    command(current_file, output_path)
+                else:
+                    cmd = command(current_file, output_path)
+                    check_call(cmd, stderr=DEVNULL, timeout=timeout)  # Suppress all output
                 current_file = output_path
             except Exception as e:
                 print(f"Error processing {file} with command {names[i]}: {e}")
