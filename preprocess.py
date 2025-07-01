@@ -85,7 +85,7 @@ if args.robex:
 
 if args.mni_reg:
     # Use mni_icbm152_nlin_sym_09c directory for MNI template
-    mni_template_path = os.path.join(CURRENT_DIR, "mni_icbm152_nlin_sym_09c", "mni_icbm152_t1_tal_nlin_sym_09c_brain.nii.gz")
+    mni_template_path = os.path.join(CURRENT_DIR, "mni_icbm152_nlin_sym_09c/mni_icbm152_t1_tal_nlin_sym_09c.nii")
     if not os.path.exists(mni_template_path):
         print(f"ERROR: MNI152 template not found at {mni_template_path}. Please add it to the repository.")
         sys.exit(1)
