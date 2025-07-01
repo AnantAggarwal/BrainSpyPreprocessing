@@ -51,6 +51,17 @@ def checkFSL():
         print(f"Error checking FSL: {e}")
         return None
 
+def download_mni_template(template_path):
+    """Download the MNI152 template if not present."""
+    if not os.path.exists(template_path):
+        print(f"Downloading MNI152 template to {template_path}...")
+        url = "https://github.com/NeuroDesk/neurodesk-mni152-templates/raw/main/MNI152_T1_1mm_brain.nii.gz"
+        os.makedirs(os.path.dirname(template_path), exist_ok=True)
+        urllib.request.urlretrieve(url, template_path)
+        print("Download complete.")
+    else:
+        print(f"MNI152 template already exists at {template_path}.")
+
 def setup_environment():
     """Setup environment for Kaggle notebooks"""
     # Set FSL environment variables
@@ -126,16 +137,7 @@ if args.segmentation:
     commands.append(segmentationCommand)
     names.append("segmented")
 
-def download_mni_template(template_path):
-    """Download the MNI152 template if not present."""
-    if not os.path.exists(template_path):
-        print(f"Downloading MNI152 template to {template_path}...")
-        url = "https://github.com/NeuroDesk/neurodesk-mni152-templates/raw/main/MNI152_T1_1mm_brain.nii.gz"
-        os.makedirs(os.path.dirname(template_path), exist_ok=True)
-        urllib.request.urlretrieve(url, template_path)
-        print("Download complete.")
-    else:
-        print(f"MNI152 template already exists at {template_path}.")
+
 
 def process_single_file(file_info):
     """Process a single file with all specified commands"""
