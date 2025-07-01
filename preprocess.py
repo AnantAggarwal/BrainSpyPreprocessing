@@ -51,17 +51,6 @@ def checkFSL():
         print(f"Error checking FSL: {e}")
         return None
 
-def download_mni_template(template_path):
-    """Download the MNI152 template if not present."""
-    if not os.path.exists(template_path):
-        print(f"Downloading MNI152 template to {template_path}...")
-        url = "https://github.com/NeuroDesk/neurodesk-mni152-templates/raw/main/MNI152_T1_1mm_brain.nii.gz"
-        os.makedirs(os.path.dirname(template_path), exist_ok=True)
-        urllib.request.urlretrieve(url, template_path)
-        print("Download complete.")
-    else:
-        print(f"MNI152 template already exists at {template_path}.")
-
 def setup_environment():
     """Setup environment for Kaggle notebooks"""
     # Set FSL environment variables
@@ -95,9 +84,11 @@ if args.robex:
     names.append("skull_stripped")
 
 if args.mni_reg:
-    # Use registration_templates directory for MNI template
-    mni_template_path = os.path.join(CURRENT_DIR, "registration_templates", "MNI152_T1_1mm_brain.nii.gz")
-    download_mni_template(mni_template_path)
+    # Use mni_icbm152_nlin_sym_09c directory for MNI template
+    mni_template_path = os.path.join(CURRENT_DIR, "mni_icbm152_nlin_sym_09c", "mni_icbm152_t1_tal_nlin_sym_09c_brain.nii.gz")
+    if not os.path.exists(mni_template_path):
+        print(f"ERROR: MNI152 template not found at {mni_template_path}. Please add it to the repository.")
+        sys.exit(1)
 
     def mniCommand(file, output_path):
         """SimpleITK-based MNI152 registration command (Python function call)"""
